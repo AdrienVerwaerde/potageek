@@ -1,3 +1,5 @@
+import { afterEach, beforeEach, expect, jest, test } from '@jest/globals';
+
 import { sendCommand } from '@/api/client';
 import type { QueuedCommand } from '@/db/command-cache';
 import { drainQueue } from '@/services/command-queue';
@@ -47,7 +49,7 @@ jest.mock('@/api/client', () => {
 jest.mock('@/stores/auth-store', () => ({ currentToken: () => 'jwt' }));
 jest.mock('@/services/auth', () => ({ signOut: jest.fn(async () => {}) }));
 
-const send = sendCommand as jest.Mock;
+const send = sendCommand as jest.MockedFunction<typeof sendCommand>;
 const device = 'esp-01';
 const networkDown = () => new TypeError('Network request failed');
 
@@ -73,7 +75,7 @@ afterEach(() => {
 test('replays pending commands in order, once each', async () => {
   // Inserted out of order: the queue must follow creation time, not insertion.
   rows.push(queued('c-2', 200, false), queued('c-1', 100, true), queued('c-3', 300, true));
-  send.mockImplementation(async (_device, { id }) => ({ id, status: 'sent' }));
+  send.mockImplementation(async (_device, { id }) => ({ id, status: 'sent' as const }));
 
   await drainQueue(device);
 
@@ -86,7 +88,7 @@ test('a retry reuses the same id, and two drains at once never send twice', asyn
   rows.push(queued('c-1', 100));
   send
     .mockRejectedValueOnce(networkDown())
-    .mockImplementation(async (_device, { id }) => ({ id, status: 'sent' }));
+    .mockImplementation(async (_device, { id }) => ({ id, status: 'sent' as const }));
 
   // The socket opening and NetInfo coming back fire together: one pass only.
   await Promise.all([drainQueue(device), drainQueue(device)]);
@@ -115,11 +117,11 @@ test('gives up as failed after 5 network failures, and stops retrying', async ()
 });
 
 test('a refusal by the backend fails at once, without retrying', async () => {
-  const { ApiError } = jest.requireMock('@/api/client');
+  const { ApiError } = jest.requireMock<typeof import('@/api/client')>('@/api/client');
   rows.push(queued('c-1', 100), queued('c-2', 200));
   send
     .mockRejectedValueOnce(new ApiError(404, 'unknown device'))
-    .mockImplementation(async (_device, { id }) => ({ id, status: 'sent' }));
+    .mockImplementation(async (_device, { id }) => ({ id, status: 'sent' as const }));
 
   await drainQueue(device);
 
