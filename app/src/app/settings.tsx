@@ -167,8 +167,8 @@ export default function SettingsScreen() {
               </View>
 
               <ThemedText type="small" themeColor="textSecondary">
-                Pour être prévenu quand un seuil est franchi ou que le capteur ne répond plus
-                depuis 3 minutes, tant que l’app est ouverte.
+                Pour être prévenu quand un seuil est franchi, même app fermée (une fois
+                connecté), et quand le capteur ne répond plus depuis 3 minutes, app ouverte.
               </ThemedText>
 
               {permission === 'unavailable' && (
