@@ -11,7 +11,10 @@
         "buildType": "apk"
       },
       "channel": "development",
-      "environment": "development"
+      "environment": "development",
+      "env": {
+        "SENTRY_ALLOW_FAILURE": "true"
+      }
     },
     "preview": {
       "distribution": "internal",
@@ -19,7 +22,10 @@
         "buildType": "apk"
       },
       "channel": "preview",
-      "environment": "preview"
+      "environment": "preview",
+      "env": {
+        "SENTRY_ALLOW_FAILURE": "true"
+      }
     },
     "production": {
       "autoIncrement": true,
